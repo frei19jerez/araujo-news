@@ -5,14 +5,6 @@ function getBaseUrl(req) {
     return req.headers['x-forwarded-prefix'];
   }
 
-  if (req.originalUrl && req.originalUrl.startsWith('/runtime/')) {
-    const partes = req.originalUrl.split('/');
-
-    if (partes[1] && partes[2]) {
-      return '/' + partes[1] + '/' + partes[2];
-    }
-  }
-
   return '';
 }
 
@@ -27,8 +19,15 @@ module.exports = {
 
   login: async function(req, res) {
     try {
-      const email = req.body.email ? req.body.email.trim().toLowerCase() : '';
-      const password = req.body.password ? req.body.password.trim() : '';
+      const baseUrl = getBaseUrl(req);
+
+      const email = req.body.email
+        ? req.body.email.trim().toLowerCase()
+        : '';
+
+      const password = req.body.password
+        ? req.body.password.trim()
+        : '';
 
       if (!email || !password) {
         return res.badRequest('Correo y contraseña obligatorios');
@@ -46,16 +45,17 @@ module.exports = {
         return res.badRequest('Contraseña incorrecta');
       }
 
-      req.session.userId = user.id;
-      req.session.rol = user.rol;
+      req.session.araujoUserId = user.id;
+      req.session.araujoRol = user.rol;
+      req.session.araujoEmail = user.email;
 
       return req.session.save(function(err) {
         if (err) {
-          sails.log.error('Error guardando sesión:', err);
+          sails.log.error('Error guardando sesión Araujo:', err);
           return res.serverError('Error guardando sesión');
         }
 
-        return res.redirect(getBaseUrl(req) + '/admin');
+        return res.redirect(baseUrl + '/admin');
       });
 
     } catch (error) {
@@ -67,7 +67,11 @@ module.exports = {
   logout: async function(req, res) {
     const baseUrl = getBaseUrl(req);
 
-    req.session.destroy(() => {
+    delete req.session.araujoUserId;
+    delete req.session.araujoRol;
+    delete req.session.araujoEmail;
+
+    return req.session.save(function() {
       return res.redirect(baseUrl + '/');
     });
   }
