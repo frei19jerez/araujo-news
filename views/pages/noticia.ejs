@@ -1,0 +1,130 @@
+<div class="container mt-4 mb-5">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <a href="/" class="btn btn-secondary">⬅ Volver</a>
+    <a href="/" class="btn btn-outline-dark">🏠 Inicio</a>
+  </div>
+
+  <div class="card shadow border-0">
+    <div class="card-body p-4">
+
+      <h1 class="mb-3"><%= noticia.titulo %></h1>
+
+      <% if (noticia.createdAt) { %>
+        <p class="text-muted small mb-3">
+          Publicado: <%= new Date(noticia.createdAt).toLocaleString('es-CO') %>
+        </p>
+      <% } %>
+
+      <% if (noticia.imagen && noticia.imagen.trim() !== '') { %>
+        <img
+          src="<%= noticia.imagen %>"
+          alt="<%= noticia.titulo %>"
+          class="img-fluid rounded mb-4 shadow-sm"
+          style="width:100%; max-height:500px; object-fit:cover;"
+          onerror="this.style.display='none';"
+        >
+      <% } %>
+
+      <% if (noticia.video && noticia.video.trim() !== '') { %>
+        <video controls class="w-100 rounded mb-4 shadow-sm" style="max-height:500px;">
+          <source src="<%= noticia.video %>">
+          Tu navegador no soporta video.
+        </video>
+      <% } %>
+
+      <% if ((!noticia.video || noticia.video.trim() === '') && noticia.youtubeUrl && noticia.youtubeUrl.trim() !== '') { %>
+        <div class="ratio ratio-16x9 mb-4">
+          <iframe
+            src="<%= noticia.youtubeUrl.replace('watch?v=', 'embed/') %>"
+            title="<%= noticia.titulo %>"
+            allowfullscreen>
+          </iframe>
+        </div>
+      <% } %>
+
+      <div class="mb-4">
+        <p class="fs-5 mb-0" style="white-space: pre-line;">
+          <%= noticia.contenido %>
+        </p>
+      </div>
+
+      <% if (noticia.categoria && noticia.categoria.nombre) { %>
+        <p class="mb-2">
+          <span class="badge bg-primary">Categoría: <%= noticia.categoria.nombre %></span>
+        </p>
+      <% } %>
+
+      <% if (noticia.autor && noticia.autor.nombre) { %>
+        <p class="text-muted small mb-4">
+          Autor: <%= noticia.autor.nombre %>
+        </p>
+      <% } %>
+
+      <hr>
+
+      <%
+        let enlaceNoticia = 'http://127.0.0.1:1337/noticia/' + noticia.id;
+        let textoCompartir = 'Mira esta noticia: ' + noticia.titulo + ' ' + enlaceNoticia;
+      %>
+
+      <h5 class="mb-3">Compartir noticia</h5>
+
+      <div class="d-flex flex-wrap gap-2">
+        <a
+          href="https://wa.me/?text=<%= encodeURIComponent(textoCompartir) %>"
+          target="_blank"
+          class="btn btn-success"
+        >
+          📲 WhatsApp
+        </a>
+
+        <a
+          href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(enlaceNoticia) %>"
+          target="_blank"
+          class="btn btn-primary"
+        >
+          📘 Facebook
+        </a>
+
+        <% if (noticia.video && noticia.video.trim() !== '') { %>
+          <a
+            href="<%= noticia.video %>"
+            target="_blank"
+            class="btn btn-danger"
+          >
+            🎥 Ver video
+          </a>
+        <% } %>
+
+        <% if (noticia.youtubeUrl && noticia.youtubeUrl.trim() !== '') { %>
+          <a
+            href="<%= noticia.youtubeUrl %>"
+            target="_blank"
+            class="btn btn-danger"
+          >
+            ▶️ YouTube
+          </a>
+        <% } %>
+
+        <button
+          type="button"
+          class="btn btn-dark"
+          onclick="copiarEnlace('<%= enlaceNoticia %>')"
+        >
+          🔗 Copiar enlace
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function copiarEnlace(url) {
+    navigator.clipboard.writeText(url)
+      .then(() => alert('Enlace copiado: ' + url))
+      .catch(() => alert('No se pudo copiar el enlace'));
+  }
+</script>

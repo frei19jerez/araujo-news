@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+  <meta charset="UTF-8">
+  <title>Noticias Puerto Araujo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- SEO -->
+  <meta name="description" content="Actualidad, comunidad y noticias de Puerto Araujo Santander">
+  <meta name="keywords" content="Puerto Araujo, noticias, Santander, actualidad, comunidad">
+  <meta name="author" content="Freimel Jerez WebApp">
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#212529">
+  <meta name="background-color" content="#212529">
+
+  <!-- APP MOVIL -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Noticias PA">
+
+  <!-- APPLE / IPHONE -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Noticias PA">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- ICONOS -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512.png">
+  <link rel="apple-touch-icon" href="/images/icon-192.png">
+
+  <!-- OPEN GRAPH -->
+  <meta property="og:title" content="Noticias Puerto Araujo">
+  <meta property="og:description" content="Actualidad, comunidad y noticias de Puerto Araujo Santander">
+  <meta property="og:image" content="/images/icon-512.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="http://localhost:1337">
+
+  <!-- TWITTER -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Noticias Puerto Araujo">
+  <meta name="twitter:description" content="Actualidad, comunidad y noticias de Puerto Araujo Santander">
+  <meta name="twitter:image" content="/images/icon-512.png">
+
+  <!-- BOOTSTRAP -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!--STYLES-->
+  <link rel="stylesheet" href="/styles/importer.css">
+  <!--STYLES END-->
+
+</head>
+
+<body class="bg-light">
+
+  <!-- HEADER -->
+  <%- include('../partials/header') %>
+
+  <!-- CONTENIDO -->
+  <%- body %>
+
+  <!-- FOOTER -->
+  <%- include('../partials/footer') %>
+
+  <!-- BOOTSTRAP -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!--SCRIPTS-->
+  <script src="/dependencies/sails.io.js"></script>
+  <!--SCRIPTS END-->
+
+  <!-- REGISTRAR SERVICE WORKER -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js')
+          .then(function (registration) {
+            console.log('✅ Service Worker registrado correctamente:', registration.scope);
+          })
+          .catch(function (error) {
+            console.log('❌ Error registrando Service Worker:', error);
+          });
+      });
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<div class="container mt-5" style="max-width:500px;">
+
+  <div class="card shadow border-0">
+
+    <div class="card-body p-4">
+
+      <h2 class="mb-4 text-center">
+        🔐 Iniciar sesión
+      </h2>
+
+      <form
+        action="<%= baseUrl || '' %>/login"
+        method="POST"
+      >
+
+        <div class="mb-3">
+
+          <input
+            type="email"
+            name="email"
+            class="form-control"
+            placeholder="Correo"
+            required
+          >
+
+        </div>
+
+        <div class="mb-3">
+
+          <input
+            type="password"
+            name="password"
+            class="form-control"
+            placeholder="Contraseña"
+            required
+          >
+
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-dark w-100"
+        >
+          Entrar
+        </button>
+
+      </form>
+
+      <div class="text-center mt-3">
+
+        <a
+          href="<%= baseUrl || '' %>/"
+          class="text-decoration-none"
+        >
+          ← Volver al portal
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
