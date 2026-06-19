@@ -1,7 +1,6 @@
 module.exports = async function(req, res, proceed) {
 
   function getBaseUrl(req) {
-
     if (req.headers['x-forwarded-prefix']) {
       return req.headers['x-forwarded-prefix'];
     }
@@ -22,11 +21,11 @@ module.exports = async function(req, res, proceed) {
 
   const baseUrl = getBaseUrl(req);
 
-  if (!req.session.userId) {
+  if (!req.session.araujoUserId) {
     return res.redirect(baseUrl + '/login');
   }
 
-  if (req.session.rol !== 'admin') {
+  if (req.session.araujoRol !== 'admin') {
     return res.forbidden('No autorizado');
   }
 
