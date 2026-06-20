@@ -21,7 +21,7 @@ module.exports = async function(req, res, proceed) {
 
   const baseUrl = getBaseUrl(req);
 
-  if (!req.session.userId) {
+  if (!req.session.araujoUserId) {
     return res.redirect(baseUrl + '/login');
   }
 
