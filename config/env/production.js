@@ -14,9 +14,21 @@ module.exports = {
   },
 
   session: {
+
+    secret: process.env.SESSION_SECRET || 'araujo-news-session-secret',
+
     cookie: {
-      secure: true
+
+      secure: false,
+
+      httpOnly: true,
+
+      sameSite: 'lax',
+
+      maxAge: 1000 * 60 * 60 * 24 * 7 // 7 días
+
     }
+
   }
 
 };
