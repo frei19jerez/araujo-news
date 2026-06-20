@@ -2,11 +2,21 @@
 
   <div class="card shadow border-0">
 
+    <div class="card-header bg-danger text-white text-center">
+      🚨 LOGIN ADMIN PUERTO ARAUJO NEWS 🚨
+    </div>
+
     <div class="card-body p-4">
 
-      <h2 class="mb-4 text-center">
-        🔐 Iniciar sesión
+      <h2 class="mb-2 text-center text-danger">
+        📰 Puerto Araujo Noticias
       </h2>
+
+      <p class="text-center text-muted">
+        Runtime independiente de DemoFlow
+      </p>
+
+      <hr>
 
       <form
         action="<%= baseUrl || '' %>/login"
@@ -19,7 +29,7 @@
             type="email"
             name="email"
             class="form-control"
-            placeholder="Correo"
+            placeholder="Correo administrador"
             required
           >
 
@@ -31,7 +41,7 @@
             type="password"
             name="password"
             class="form-control"
-            placeholder="Contraseña"
+            placeholder="Contraseña administrador"
             required
           >
 
@@ -39,12 +49,16 @@
 
         <button
           type="submit"
-          class="btn btn-dark w-100"
+          class="btn btn-danger w-100"
         >
-          Entrar
+          🔐 Entrar a Puerto Araujo News
         </button>
 
       </form>
+
+      <div class="alert alert-warning mt-3 mb-0 text-center">
+        Si ves esta pantalla, estás dentro del login de Araujo News y NO en DemoFlow.
+      </div>
 
       <div class="text-center mt-3">
 
