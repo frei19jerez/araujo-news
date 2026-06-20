@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
   <div class="container">
 
-    <% 
+    <%
       var baseUrl = '';
 
       if (
@@ -13,7 +13,10 @@
       }
     %>
 
-    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="<%= baseUrl %>/">
+    <a
+      class="navbar-brand fw-bold d-flex align-items-center gap-2"
+      href="<%= baseUrl %>/"
+    >
       <span>📰</span>
       <span>Puerto Araujo Noticias</span>
     </a>
@@ -31,22 +34,38 @@
     </button>
 
     <div class="collapse navbar-collapse" id="menuPrincipal">
+
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
 
         <li class="nav-item">
-          <a class="nav-link px-3" href="<%= baseUrl %>/">🏠 Inicio</a>
+          <a
+            class="nav-link px-3"
+            href="<%= baseUrl %>/"
+          >
+            🏠 Inicio
+          </a>
         </li>
 
-        <% if (locals.req && req.session && req.session.userId) { %>
+        <% if (
+          locals.req &&
+          req.session &&
+          req.session.araujoUserId
+        ) { %>
 
           <li class="nav-item">
-            <a class="nav-link text-warning fw-semibold px-3" href="<%= baseUrl %>/admin">
+            <a
+              class="nav-link text-warning fw-semibold px-3"
+              href="<%= baseUrl %>/admin"
+            >
               ⚙️ Panel
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="btn btn-danger btn-sm px-3" href="<%= baseUrl %>/logout">
+            <a
+              class="btn btn-danger btn-sm px-3"
+              href="<%= baseUrl %>/logout"
+            >
               Salir
             </a>
           </li>
@@ -54,7 +73,10 @@
         <% } else { %>
 
           <li class="nav-item">
-            <a class="btn btn-outline-light btn-sm px-3" href="<%= baseUrl %>/login">
+            <a
+              class="btn btn-outline-light btn-sm px-3"
+              href="<%= baseUrl %>/login"
+            >
               🔐 Admin
             </a>
           </li>
@@ -62,6 +84,7 @@
         <% } %>
 
       </ul>
+
     </div>
 
   </div>
