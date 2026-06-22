@@ -139,6 +139,17 @@ function obtenerRutaPublica(file) {
   return '/uploads/' + path.basename(file.fd);
 }
 
+function getBaseUrl(req) {
+  if (
+    req.headers &&
+    req.headers['x-forwarded-prefix']
+  ) {
+    return req.headers['x-forwarded-prefix'];
+  }
+
+  return '';
+}
+
 module.exports = {
 
   // 🔵 PORTADA
@@ -257,7 +268,8 @@ module.exports = {
 
       await Noticia.create(nuevaNoticia);
 
-      return res.redirect('/admin/publicaciones');
+     const baseUrl = getBaseUrl(req);
+     return res.redirect(baseUrl + '/admin/publicaciones');
 
     } catch (error) {
       console.error('Error creando noticia:', error);
@@ -356,41 +368,42 @@ module.exports = {
   },
 
   // 🟠 BUSCADOR SIMPLE
-  async buscar(req, res) {
-    try {
-      const q = limpiarTexto(req.query.q || '');
+async buscar(req, res) {
+  try {
+    const q = limpiarTexto(req.query.q || '');
 
-      if (!q) {
-        return res.redirect('/noticia');
-      }
-
-      let noticias = await Noticia.find({
-        or: [
-          { titulo: { contains: q } },
-          { contenido: { contains: q } },
-          { resumen: { contains: q } }
-        ]
-      })
-        .sort('id DESC')
-        .populate('categoria')
-        .populate('autor');
-
-      noticias = limpiarAutor(noticias).map(n => {
-        n.resumenCorto = n.resumen || generarResumen(n.contenido, 180);
-        n.youtubeEmbed = youtubeEmbedUrl(n.youtubeUrl || '');
-        return n;
-      });
-
-      return res.view('pages/homepage', {
-        noticias,
-        busqueda: q
-      });
-
-    } catch (error) {
-      console.error('Error buscando noticias:', error);
-      return res.serverError('Error buscando noticias');
+    if (!q) {
+      const baseUrl = getBaseUrl(req);
+      return res.redirect(baseUrl + '/');
     }
-  },
+
+    let noticias = await Noticia.find({
+      or: [
+        { titulo: { contains: q } },
+        { contenido: { contains: q } },
+        { resumen: { contains: q } }
+      ]
+    })
+      .sort('id DESC')
+      .populate('categoria')
+      .populate('autor');
+
+    noticias = limpiarAutor(noticias).map(n => {
+      n.resumenCorto = n.resumen || generarResumen(n.contenido, 180);
+      n.youtubeEmbed = youtubeEmbedUrl(n.youtubeUrl || '');
+      return n;
+    });
+
+    return res.view('pages/homepage', {
+      noticias,
+      busqueda: q
+    });
+
+  } catch (error) {
+    console.error('Error buscando noticias:', error);
+    return res.serverError('Error buscando noticias');
+  }
+},
 
   // 📁 SERVIR ARCHIVOS SUBIDOS
   archivo(req, res) {
