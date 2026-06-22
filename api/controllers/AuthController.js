@@ -1,7 +1,10 @@
 const bcrypt = require('bcryptjs');
 
 function getBaseUrl(req) {
-  if (req.headers['x-forwarded-prefix']) {
+  if (
+    req.headers &&
+    req.headers['x-forwarded-prefix']
+  ) {
     return req.headers['x-forwarded-prefix'];
   }
 
@@ -59,7 +62,7 @@ module.exports = {
       });
 
     } catch (error) {
-      console.log(error);
+      sails.log.error('Error iniciando sesión Araujo:', error);
       return res.serverError('Error iniciando sesión');
     }
   },
