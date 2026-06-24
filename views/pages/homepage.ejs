@@ -1,5 +1,6 @@
 <%
-  let baseUrl = 'http://localhost:1337';
+  const runtimeBase = typeof baseUrl !== 'undefined' ? baseUrl : '';
+  const publicBase = 'https://demoflowapp.com' + runtimeBase;
 %>
 
 <div class="container mt-4 mb-5">
@@ -12,7 +13,7 @@
       Actualidad, comunidad y noticias de Puerto Araujo Santander
     </p>
 
-    <form action="/buscar" method="GET" class="mx-auto" style="max-width:700px;">
+    <form action="<%= runtimeBase %>/buscar" method="GET" class="mx-auto" style="max-width:700px;">
       <div class="input-group shadow-sm">
         <input
           type="text"
@@ -39,8 +40,9 @@
   <% if (typeof noticias !== 'undefined' && noticias.length > 0) { %>
 
     <% let principal = noticias[0]; %>
-    <% let enlacePrincipal = principal.slug ? '/n/' + principal.slug : '/noticia/' + principal.id; %>
-    <% let urlCompletaPrincipal = baseUrl + enlacePrincipal; %>
+    <% let rutaPrincipal = principal.slug ? '/n/' + principal.slug : '/noticia/' + principal.id; %>
+    <% let enlacePrincipal = runtimeBase + rutaPrincipal; %>
+    <% let urlCompletaPrincipal = publicBase + rutaPrincipal; %>
     <% let textoPrincipal = 'Mira esta noticia: ' + principal.titulo + ' ' + urlCompletaPrincipal; %>
 
     <div class="card shadow border-0 mb-5 overflow-hidden noticia-card">
@@ -126,8 +128,9 @@
 
       <% noticias.slice(1).forEach(function(n) { %>
 
-        <% let enlaceNoticia = n.slug ? '/n/' + n.slug : '/noticia/' + n.id; %>
-        <% let urlCompleta = baseUrl + enlaceNoticia; %>
+        <% let rutaNoticia = n.slug ? '/n/' + n.slug : '/noticia/' + n.id; %>
+        <% let enlaceNoticia = runtimeBase + rutaNoticia; %>
+        <% let urlCompleta = publicBase + rutaNoticia; %>
         <% let textoCompartir = 'Mira esta noticia: ' + n.titulo + ' ' + urlCompleta; %>
 
         <div class="col-md-6 mb-4">

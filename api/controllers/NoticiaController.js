@@ -134,9 +134,11 @@ function subirArchivo(req, fieldName, dirname, maxBytes) {
   });
 }
 
-function obtenerRutaPublica(file) {
+function obtenerRutaPublica(req, file) {
   if (!file || !file.fd) return '';
-  return '/uploads/' + path.basename(file.fd);
+
+  const baseUrl = getBaseUrl(req);
+  return baseUrl + '/uploads/' + path.basename(file.fd);
 }
 
 function getBaseUrl(req) {
@@ -153,31 +155,37 @@ function getBaseUrl(req) {
 module.exports = {
 
   // 🔵 PORTADA
-  async index(req, res) {
-    try {
-      let noticias = await Noticia.find()
-        .sort('id DESC')
-        .populate('categoria')
-        .populate('autor');
+  // 🔵 PORTADA
+async index(req, res) {
+  try {
 
-      noticias = limpiarAutor(noticias).map(n => {
-        n.resumenCorto = n.resumen || generarResumen(n.contenido, 180);
-        n.youtubeEmbed = youtubeEmbedUrl(n.youtubeUrl || '');
-        return n;
-      });
+    let noticias = await Noticia.find()
+      .sort('id DESC')
+      .populate('categoria')
+      .populate('autor');
 
-      return res.view('pages/homepage', {
-        noticias: noticias || []
-      });
+    noticias = limpiarAutor(noticias).map(n => {
+      n.resumenCorto = n.resumen || generarResumen(n.contenido, 180);
+      n.youtubeEmbed = youtubeEmbedUrl(n.youtubeUrl || '');
+      return n;
+    });
 
-    } catch (error) {
-      console.error('Error cargando noticias:', error);
+    return res.view('pages/homepage', {
+      noticias: noticias || [],
+      baseUrl: getBaseUrl(req)
+    });
 
-      return res.view('pages/homepage', {
-        noticias: []
-      });
-    }
-  },
+  } catch (error) {
+
+    console.error('Error cargando noticias:', error);
+
+    return res.view('pages/homepage', {
+      noticias: [],
+      baseUrl: getBaseUrl(req)
+    });
+
+  }
+},
 
   // 🟢 CREAR NOTICIA
   async crear(req, res) {
@@ -230,7 +238,7 @@ module.exports = {
           return res.badRequest('El archivo de imagen no es válido');
         }
 
-        imagen = obtenerRutaPublica(archivoImagen);
+        imagen = obtenerRutaPublica(req, archivoImagen);
       }
 
       if (videoFiles.length > 0) {
@@ -241,7 +249,7 @@ module.exports = {
           return res.badRequest('El archivo de video no es válido');
         }
 
-        video = obtenerRutaPublica(archivoVideo);
+        video = obtenerRutaPublica(req, archivoVideo);
       }
 
       const slug = await generarSlugUnico(titulo);
@@ -278,96 +286,98 @@ module.exports = {
   },
 
   // 🔵 VER NOTICIA INDIVIDUAL
-  async ver(req, res) {
-    try {
-      const id = req.params.id;
+async ver(req, res) {
+  try {
+    const id = req.params.id;
 
-      if (!id || isNaN(id)) {
-        return res.badRequest('Id de noticia no válido');
-      }
-
-      let noticia = await Noticia.findOne({ id: Number(id) })
-        .populate('categoria')
-        .populate('autor');
-
-      if (!noticia) {
-        return res.notFound('Noticia no encontrada');
-      }
-
-      noticia = limpiarAutor(noticia);
-      noticia.youtubeEmbed = youtubeEmbedUrl(noticia.youtubeUrl || '');
-
-      let relacionadas = await Noticia.find({
-        id: { '!=': noticia.id }
-      })
-        .sort('id DESC')
-        .limit(4)
-        .populate('categoria')
-        .populate('autor');
-
-      relacionadas = limpiarAutor(relacionadas).map(n => {
-        n.resumenCorto = n.resumen || generarResumen(n.contenido, 120);
-        n.youtubeEmbed = youtubeEmbedUrl(n.youtubeUrl || '');
-        return n;
-      });
-
-      return res.view('pages/noticia', {
-        noticia,
-        relacionadas
-      });
-
-    } catch (error) {
-      console.error('Error cargando noticia:', error);
-      return res.serverError('Error cargando noticia');
+    if (!id || isNaN(id)) {
+      return res.badRequest('Id de noticia no válido');
     }
-  },
+
+    let noticia = await Noticia.findOne({ id: Number(id) })
+      .populate('categoria')
+      .populate('autor');
+
+    if (!noticia) {
+      return res.notFound('Noticia no encontrada');
+    }
+
+    noticia = limpiarAutor(noticia);
+    noticia.youtubeEmbed = youtubeEmbedUrl(noticia.youtubeUrl || '');
+
+    let relacionadas = await Noticia.find({
+      id: { '!=': noticia.id }
+    })
+      .sort('id DESC')
+      .limit(4)
+      .populate('categoria')
+      .populate('autor');
+
+    relacionadas = limpiarAutor(relacionadas).map(n => {
+      n.resumenCorto = n.resumen || generarResumen(n.contenido, 120);
+      n.youtubeEmbed = youtubeEmbedUrl(n.youtubeUrl || '');
+      return n;
+    });
+
+    return res.view('pages/noticia', {
+      noticia,
+      relacionadas,
+      baseUrl: getBaseUrl(req)
+    });
+
+  } catch (error) {
+    console.error('Error cargando noticia:', error);
+    return res.serverError('Error cargando noticia');
+  }
+},
 
   // 🟡 VER POR SLUG
-  async verPorSlug(req, res) {
-    try {
-      const slug = limpiarTexto(req.params.slug || '');
+async verPorSlug(req, res) {
+  try {
+    const slug = limpiarTexto(req.params.slug || '');
 
-      if (!slug) {
-        return res.badRequest('Slug no válido');
-      }
-
-      let noticia = await Noticia.findOne({ slug })
-        .populate('categoria')
-        .populate('autor');
-
-      if (!noticia) {
-        return res.notFound('Noticia no encontrada');
-      }
-
-      noticia = limpiarAutor(noticia);
-      noticia.youtubeEmbed = youtubeEmbedUrl(noticia.youtubeUrl || '');
-
-      let relacionadas = await Noticia.find({
-        id: { '!=': noticia.id }
-      })
-        .sort('id DESC')
-        .limit(4)
-        .populate('categoria')
-        .populate('autor');
-
-      relacionadas = limpiarAutor(relacionadas).map(n => {
-        n.resumenCorto = n.resumen || generarResumen(n.contenido, 120);
-        n.youtubeEmbed = youtubeEmbedUrl(n.youtubeUrl || '');
-        return n;
-      });
-
-      return res.view('pages/noticia', {
-        noticia,
-        relacionadas
-      });
-
-    } catch (error) {
-      console.error('Error cargando noticia por slug:', error);
-      return res.serverError('Error cargando noticia');
+    if (!slug) {
+      return res.badRequest('Slug no válido');
     }
-  },
 
-  // 🟠 BUSCADOR SIMPLE
+    let noticia = await Noticia.findOne({ slug })
+      .populate('categoria')
+      .populate('autor');
+
+    if (!noticia) {
+      return res.notFound('Noticia no encontrada');
+    }
+
+    noticia = limpiarAutor(noticia);
+    noticia.youtubeEmbed = youtubeEmbedUrl(noticia.youtubeUrl || '');
+
+    let relacionadas = await Noticia.find({
+      id: { '!=': noticia.id }
+    })
+      .sort('id DESC')
+      .limit(4)
+      .populate('categoria')
+      .populate('autor');
+
+    relacionadas = limpiarAutor(relacionadas).map(n => {
+      n.resumenCorto = n.resumen || generarResumen(n.contenido, 120);
+      n.youtubeEmbed = youtubeEmbedUrl(n.youtubeUrl || '');
+      return n;
+    });
+
+    return res.view('pages/noticia', {
+      noticia,
+      relacionadas,
+      baseUrl: getBaseUrl(req)
+    });
+
+  } catch (error) {
+    console.error('Error cargando noticia por slug:', error);
+    return res.serverError('Error cargando noticia');
+  }
+},
+
+ // 🟠 BUSCADOR SIMPLE
 async buscar(req, res) {
   try {
     const q = limpiarTexto(req.query.q || '');
@@ -396,7 +406,8 @@ async buscar(req, res) {
 
     return res.view('pages/homepage', {
       noticias,
-      busqueda: q
+      busqueda: q,
+      baseUrl: getBaseUrl(req)
     });
 
   } catch (error) {
