@@ -187,103 +187,111 @@ async index(req, res) {
   }
 },
 
-  // 🟢 CREAR NOTICIA
-  async crear(req, res) {
-    try {
-      const titulo = limpiarTexto(req.body.titulo || '');
-      const contenido = limpiarTexto(req.body.contenido || '');
-      const youtubeUrl = normalizarYoutubeUrl(req.body.youtubeUrl || '');
+ // 🟢 CREAR NOTICIA
+async crear(req, res) {
+  try {
+    const titulo = limpiarTexto(req.body.titulo || '');
+    const contenido = limpiarTexto(req.body.contenido || '');
+    const youtubeUrl = normalizarYoutubeUrl(req.body.youtubeUrl || '');
+    const baseUrl = getBaseUrl(req);
 
-      if (!titulo || !contenido) {
-        return res.badRequest('Título y contenido son obligatorios');
-      }
-
-      const uploadDir = path.resolve(sails.config.appPath, 'assets/uploads');
-      asegurarCarpeta(uploadDir);
-
-      let imagen = '';
-      let video = '';
-
-      let imagenFiles = [];
-      let videoFiles = [];
-
-      try {
-        const resultados = await Promise.all([
-          subirArchivo(req, 'imagen', uploadDir, LIMITE_IMAGEN),
-          subirArchivo(req, 'video', uploadDir, LIMITE_VIDEO)
-        ]);
-
-        imagenFiles = resultados[0];
-        videoFiles = resultados[1];
-
-      } catch (err) {
-        console.error('Error real subiendo archivos:', err);
-
-        if (err.code === 'E_EXCEEDS_UPLOAD_LIMIT') {
-          return res.badRequest('Uno de los archivos supera el límite permitido');
-        }
-
-        if (err.code === 'EMAXBUFFER') {
-          return res.badRequest('La subida tardó demasiado. Intenta con un video más liviano o usa YouTube.');
-        }
-
-        return res.serverError('Error subiendo archivos');
-      }
-
-      if (imagenFiles.length > 0) {
-        const archivoImagen = imagenFiles[0];
-        const tipoImagen = (archivoImagen.type || '').toLowerCase();
-
-        if (!tipoImagen.startsWith('image/')) {
-          return res.badRequest('El archivo de imagen no es válido');
-        }
-
-        imagen = obtenerRutaPublica(req, archivoImagen);
-      }
-
-      if (videoFiles.length > 0) {
-        const archivoVideo = videoFiles[0];
-        const tipoVideo = (archivoVideo.type || '').toLowerCase();
-
-        if (!tipoVideo.startsWith('video/')) {
-          return res.badRequest('El archivo de video no es válido');
-        }
-
-        video = obtenerRutaPublica(req, archivoVideo);
-      }
-
-      const slug = await generarSlugUnico(titulo);
-      const resumen = generarResumen(contenido, 180);
-
-      const nuevaNoticia = {
-        titulo,
-        slug,
-        contenido,
-        resumen,
-        imagen,
-        video,
-        youtubeUrl,
-        destacada: req.body.destacada ? true : false
-      };
-
-      if (req.session && req.session.userId) {
-        nuevaNoticia.autor = req.session.userId;
-      }
-
-      if (req.body.categoria && !isNaN(req.body.categoria)) {
-        nuevaNoticia.categoria = Number(req.body.categoria);
-      }
-
-      await Noticia.create(nuevaNoticia);
-
-     const baseUrl = getBaseUrl(req);
-     return res.redirect(baseUrl + '/admin/publicaciones');
-
-    } catch (error) {
-      console.error('Error creando noticia:', error);
-      return res.serverError('No se pudo crear la noticia');
+    if (!titulo || !contenido) {
+      return res.badRequest('Título y contenido son obligatorios');
     }
-  },
+
+    const uploadDir = path.resolve(sails.config.appPath, 'assets/uploads');
+    asegurarCarpeta(uploadDir);
+
+    let imagen = '';
+    let video = '';
+    let imagenFiles = [];
+    let videoFiles = [];
+
+    try {
+      imagenFiles = await subirArchivo(req, 'imagen', uploadDir, LIMITE_IMAGEN);
+      videoFiles = await subirArchivo(req, 'video', uploadDir, LIMITE_VIDEO);
+
+      console.log('==============================');
+      console.log('📦 BODY:', req.body);
+      console.log('📸 IMAGEN FILES:', imagenFiles);
+      console.log('🎥 VIDEO FILES:', videoFiles);
+      console.log('==============================');
+
+    } catch (err) {
+      console.error('Error real subiendo archivos:', err);
+
+      if (err.code === 'E_EXCEEDS_UPLOAD_LIMIT') {
+        return res.badRequest('Uno de los archivos supera el límite permitido');
+      }
+
+      if (err.code === 'EMAXBUFFER') {
+        return res.badRequest('La subida tardó demasiado. Intenta con un video más liviano o usa YouTube.');
+      }
+
+      return res.serverError('Error subiendo archivos');
+    }
+
+    if (imagenFiles.length > 0) {
+      const archivoImagen = imagenFiles[0];
+      console.log('📸 ARCHIVO IMAGEN:', archivoImagen);
+
+      const tipoImagen = (archivoImagen.type || '').toLowerCase();
+
+      if (!tipoImagen.startsWith('image/')) {
+        return res.badRequest('El archivo de imagen no es válido');
+      }
+
+      imagen = obtenerRutaPublica(req, archivoImagen);
+      console.log('✅ RUTA IMAGEN:', imagen);
+    }
+
+    if (videoFiles.length > 0) {
+      const archivoVideo = videoFiles[0];
+      console.log('🎥 ARCHIVO VIDEO:', archivoVideo);
+
+      const tipoVideo = (archivoVideo.type || '').toLowerCase();
+
+      if (!tipoVideo.startsWith('video/')) {
+        return res.badRequest('El archivo de video no es válido');
+      }
+
+      video = obtenerRutaPublica(req, archivoVideo);
+      console.log('✅ RUTA VIDEO:', video);
+    }
+
+    const slug = await generarSlugUnico(titulo);
+    const resumen = generarResumen(contenido, 180);
+
+    const nuevaNoticia = {
+      titulo,
+      slug,
+      contenido,
+      resumen,
+      imagen,
+      video,
+      youtubeUrl,
+      destacada: req.body.destacada ? true : false
+    };
+
+    if (req.session && req.session.userId) {
+      nuevaNoticia.autor = req.session.userId;
+    }
+
+    if (req.body.categoria && !isNaN(req.body.categoria)) {
+      nuevaNoticia.categoria = Number(req.body.categoria);
+    }
+
+    console.log('📝 NOTICIA A CREAR:', nuevaNoticia);
+
+    await Noticia.create(nuevaNoticia);
+
+    return res.redirect(baseUrl + '/admin/publicaciones');
+
+  } catch (error) {
+    console.error('Error creando noticia:', error);
+    return res.serverError('No se pudo crear la noticia');
+  }
+},
 
   // 🔵 VER NOTICIA INDIVIDUAL
 async ver(req, res) {
