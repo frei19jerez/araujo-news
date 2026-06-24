@@ -19,31 +19,58 @@
   <div class="card shadow border-0">
     <div class="card-body p-4">
 
-     <form action="<%= baseUrl %>/admin/noticia/crear" method="POST" enctype="multipart/form-data"></form>
+      <form action="<%= baseUrl %>/noticia" method="POST" enctype="multipart/form-data">
 
         <div class="mb-3">
           <label class="form-label fw-semibold">Título</label>
-          <input type="text" name="titulo" class="form-control" placeholder="Escribe el título de la noticia" required>
+          <input
+            type="text"
+            name="titulo"
+            class="form-control"
+            placeholder="Escribe el título de la noticia"
+            required>
         </div>
 
         <div class="mb-3">
           <label class="form-label fw-semibold">Contenido</label>
-          <textarea name="contenido" class="form-control" rows="8" placeholder="Escribe aquí la noticia..." required></textarea>
+          <textarea
+            name="contenido"
+            class="form-control"
+            rows="8"
+            placeholder="Escribe aquí la noticia..."
+            required></textarea>
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">Categoría de publicación</label>
+          <label class="form-label fw-semibold">
+            Categoría de publicación
+          </label>
 
-          <select name="categoria" class="form-select shadow-sm" required>
+          <select
+            name="categoria"
+            class="form-select shadow-sm"
+            required>
+
             <option value="">📂 Seleccione una categoría</option>
 
             <% if (typeof categorias !== 'undefined' && categorias.length > 0) { %>
-              <% categorias.forEach(function(c) { %>
-                <option value="<%= c.id %>"><%= c.nombre %></option>
-              <% }); %>
+
+              <% categorias.forEach(function(c){ %>
+
+                <option value="<%= c.id %>">
+                  <%= c.nombre %>
+                </option>
+
+              <% }) %>
+
             <% } else { %>
-              <option value="">No hay categorías registradas</option>
+
+              <option value="">
+                No hay categorías registradas
+              </option>
+
             <% } %>
+
           </select>
 
           <div class="form-text">
@@ -52,42 +79,92 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">Imagen portada</label>
-          <input type="file" name="imagen" class="form-control" accept="image/*">
-          <div class="form-text">Formato recomendado JPG / PNG.</div>
+          <label class="form-label fw-semibold">
+            Imagen portada
+          </label>
+
+          <input
+            type="file"
+            name="imagen"
+            class="form-control"
+            accept="image/*">
+
+          <div class="form-text">
+            Formato recomendado JPG / PNG.
+          </div>
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">Video</label>
-          <input type="file" name="video" class="form-control" accept="video/*">
-          <div class="form-text">Para videos largos se recomienda usar YouTube.</div>
+          <label class="form-label fw-semibold">
+            Video
+          </label>
+
+          <input
+            type="file"
+            name="video"
+            class="form-control"
+            accept="video/*">
+
+          <div class="form-text">
+            Para videos largos se recomienda usar YouTube.
+          </div>
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">Enlace YouTube</label>
-          <input type="url" name="youtubeUrl" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
-          <div class="form-text">Pega aquí el enlace si el video está en YouTube.</div>
+          <label class="form-label fw-semibold">
+            Enlace YouTube
+          </label>
+
+          <input
+            type="url"
+            name="youtubeUrl"
+            class="form-control"
+            placeholder="https://www.youtube.com/watch?v=...">
+
+          <div class="form-text">
+            Pega aquí el enlace si el video está en YouTube.
+          </div>
         </div>
 
         <div class="form-check mb-4">
-          <input class="form-check-input" type="checkbox" name="destacada" value="1" id="destacada">
-          <label class="form-check-label fw-semibold" for="destacada">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            name="destacada"
+            value="1"
+            id="destacada">
+
+          <label
+            class="form-check-label fw-semibold"
+            for="destacada">
+
             ⭐ Marcar como noticia destacada
+
           </label>
         </div>
 
         <div class="row g-2">
+
           <div class="col-md-8">
-            <button type="submit" class="btn btn-success w-100">
+            <button
+              type="submit"
+              class="btn btn-success w-100">
+
               ✅ Publicar noticia
+
             </button>
           </div>
 
           <div class="col-md-4">
-            <a href="<%= baseUrl %>/admin/publicaciones" class="btn btn-outline-secondary w-100">
+            <a
+              href="<%= baseUrl %>/admin/publicaciones"
+              class="btn btn-outline-secondary w-100">
+
               Cancelar
+
             </a>
           </div>
+
         </div>
 
       </form>
