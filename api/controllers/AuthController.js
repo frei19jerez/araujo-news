@@ -1,82 +1,219 @@
 const bcrypt = require('bcryptjs');
 
+/**
+ * Obtiene el prefijo utilizado por DemoFlow.
+ *
+ * Ejemplo:
+ * /runtime/araujo-news
+ */
 function getBaseUrl(req) {
-  if (
-    req.headers &&
-    req.headers['x-forwarded-prefix']
-  ) {
-    return req.headers['x-forwarded-prefix'];
+  const headers = req.headers || {};
+
+  const prefix =
+    headers['x-runtime-prefix'] ||
+    headers['x-forwarded-prefix'] ||
+    '';
+
+  if (!prefix) {
+    return '';
   }
 
-  return '';
+  const limpio = String(prefix)
+    .trim()
+    .replace(/\/+$/, '');
+
+  if (!limpio.startsWith('/')) {
+    return `/${limpio}`;
+  }
+
+  return limpio;
+}
+
+/**
+ * Guarda la sesión si el adaptador incluye req.session.save().
+ * Si no existe, Sails guardará la sesión automáticamente.
+ */
+function guardarSesion(req, callback) {
+  if (
+    req.session &&
+    typeof req.session.save === 'function'
+  ) {
+    return req.session.save(callback);
+  }
+
+  return callback(null);
 }
 
 module.exports = {
 
-  loginPage: async function(req, res) {
-    return res.view('pages/auth/login', {
-      titulo: 'Iniciar sesión',
-      baseUrl: getBaseUrl(req)
-    });
-  },
-
-  login: async function(req, res) {
+  /**
+   * GET /login
+   */
+  loginPage: async function (req, res) {
     try {
       const baseUrl = getBaseUrl(req);
 
-      const email = req.body.email
-        ? req.body.email.trim().toLowerCase()
-        : '';
+      return res.view('pages/auth/login', {
+        titulo: 'Iniciar sesión',
+        baseUrl
+      });
+    } catch (error) {
+      sails.log.error(
+        'Error mostrando login de Araujo News:',
+        error
+      );
 
-      const password = req.body.password
-        ? req.body.password.trim()
-        : '';
+      return res.serverError(
+        'No fue posible mostrar el inicio de sesión'
+      );
+    }
+  },
+
+  /**
+   * POST /login
+   */
+  login: async function (req, res) {
+    try {
+      const baseUrl = getBaseUrl(req);
+
+      const email = String(req.body.email || '')
+        .trim()
+        .toLowerCase();
+
+      const password = String(req.body.password || '')
+        .trim();
+
+      sails.log.info(
+        'Araujo News: intento de inicio de sesión',
+        {
+          email,
+          baseUrl,
+          runtimePrefix:
+            req.headers['x-runtime-prefix'] || '',
+          forwardedPrefix:
+            req.headers['x-forwarded-prefix'] || ''
+        }
+      );
 
       if (!email || !password) {
-        return res.badRequest('Correo y contraseña obligatorios');
+        return res.badRequest(
+          'Correo y contraseña obligatorios'
+        );
       }
 
       const user = await Usuario.findOne({ email });
 
       if (!user) {
-        return res.badRequest('Usuario no encontrado');
+        sails.log.warn(
+          `Araujo News: usuario no encontrado: ${email}`
+        );
+
+        return res.badRequest(
+          'Correo o contraseña incorrectos'
+        );
       }
 
-      const ok = await bcrypt.compare(password, user.password);
+      if (!user.password) {
+        sails.log.error(
+          `Araujo News: el usuario ${email} no tiene contraseña`
+        );
 
-      if (!ok) {
-        return res.badRequest('Contraseña incorrecta');
+        return res.serverError(
+          'El usuario no tiene una contraseña configurada'
+        );
+      }
+
+      const passwordCorrecta = await bcrypt.compare(
+        password,
+        user.password
+      );
+
+      if (!passwordCorrecta) {
+        sails.log.warn(
+          `Araujo News: contraseña incorrecta para ${email}`
+        );
+
+        return res.badRequest(
+          'Correo o contraseña incorrectos'
+        );
       }
 
       req.session.araujoUserId = user.id;
       req.session.araujoRol = user.rol;
       req.session.araujoEmail = user.email;
+      req.session.araujoNombre = user.nombre;
 
-      return req.session.save(function(err) {
-        if (err) {
-          sails.log.error('Error guardando sesión Araujo:', err);
-          return res.serverError('Error guardando sesión');
+      return guardarSesion(req, function (errorSesion) {
+        if (errorSesion) {
+          sails.log.error(
+            'Error guardando sesión de Araujo News:',
+            errorSesion
+          );
+
+          return res.serverError(
+            'Error guardando la sesión'
+          );
         }
 
-        return res.redirect(baseUrl + '/admin');
+        const destino = `${baseUrl}/admin`;
+
+        sails.log.info(
+          `Araujo News: inicio de sesión correcto. Redirigiendo a ${destino}`
+        );
+
+        return res.redirect(destino);
       });
 
     } catch (error) {
-      sails.log.error('Error iniciando sesión Araujo:', error);
-      return res.serverError('Error iniciando sesión');
+      sails.log.error(
+        'Error iniciando sesión en Araujo News:',
+        error
+      );
+
+      sails.log.error(
+        'Detalle del error:',
+        error && error.stack
+          ? error.stack
+          : error
+      );
+
+      return res.serverError(
+        'Error iniciando sesión'
+      );
     }
   },
 
-  logout: async function(req, res) {
-    const baseUrl = getBaseUrl(req);
+  /**
+   * GET /logout
+   */
+  logout: async function (req, res) {
+    try {
+      const baseUrl = getBaseUrl(req);
 
-    delete req.session.araujoUserId;
-    delete req.session.araujoRol;
-    delete req.session.araujoEmail;
+      delete req.session.araujoUserId;
+      delete req.session.araujoRol;
+      delete req.session.araujoEmail;
+      delete req.session.araujoNombre;
 
-    return req.session.save(function() {
-      return res.redirect(baseUrl + '/');
-    });
+      return guardarSesion(req, function (errorSesion) {
+        if (errorSesion) {
+          sails.log.error(
+            'Error cerrando sesión de Araujo News:',
+            errorSesion
+          );
+        }
+
+        return res.redirect(`${baseUrl}/`);
+      });
+
+    } catch (error) {
+      sails.log.error(
+        'Error cerrando sesión de Araujo News:',
+        error
+      );
+
+      return res.redirect('/');
+    }
   }
 
 };
