@@ -2,15 +2,49 @@
   <div class="container">
 
     <%
+      /*
+       * Prefijo del runtime.
+       *
+       * DemoFlow envía:
+       * X-Runtime-Prefix: /runtime/araujo-news
+       *
+       * Si la aplicación se abre directamente, queda vacío.
+       */
+
       var baseUrl = '';
 
       if (
+        typeof req !== 'undefined' &&
+        req.headers &&
+        req.headers['x-runtime-prefix']
+      ) {
+        baseUrl = req.headers['x-runtime-prefix'];
+      } else if (
         typeof req !== 'undefined' &&
         req.originalUrl &&
         req.originalUrl.indexOf('/runtime/araujo-news') === 0
       ) {
         baseUrl = '/runtime/araujo-news';
       }
+
+      /*
+       * Evitar una barra final duplicada.
+       */
+      if (
+        baseUrl &&
+        baseUrl.endsWith('/')
+      ) {
+        baseUrl = baseUrl.slice(0, -1);
+      }
+
+      /*
+       * Saber si el administrador de Araujo News
+       * tiene una sesión activa.
+       */
+      var adminAraujoAutenticado =
+        typeof req !== 'undefined' &&
+        req.session &&
+        req.session.araujoUserId;
     %>
 
     <a
@@ -33,8 +67,10 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="menuPrincipal">
-
+    <div
+      class="collapse navbar-collapse"
+      id="menuPrincipal"
+    >
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
 
         <li class="nav-item">
@@ -46,11 +82,7 @@
           </a>
         </li>
 
-        <% if (
-          locals.req &&
-          req.session &&
-          req.session.araujoUserId
-        ) { %>
+        <% if (adminAraujoAutenticado) { %>
 
           <li class="nav-item">
             <a
@@ -84,7 +116,6 @@
         <% } %>
 
       </ul>
-
     </div>
 
   </div>
