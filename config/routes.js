@@ -10,10 +10,8 @@ module.exports.routes = {
   'GET /buscar': 'NoticiaController.buscar',
 
   // ===============================
-  // CREAR NOTICIA (ADMIN)
+  // ARCHIVOS
   // ===============================
-  'POST /noticia': 'NoticiaController.crear',
-
   'GET /uploads/:file': 'NoticiaController.archivo',
 
   // ===============================
@@ -29,15 +27,21 @@ module.exports.routes = {
   'GET /admin': 'AdminController.dashboard',
   'GET /admin/publicaciones': 'AdminController.publicaciones',
 
+  // ===============================
   // NUEVA NOTICIA
+  // ===============================
   'GET /admin/noticia/nueva': 'AdminController.nuevaPage',
   'POST /admin/noticia/crear': 'NoticiaController.crear',
 
+  // ===============================
   // EDITAR NOTICIA
+  // ===============================
   'GET /admin/noticia/editar/:id': 'AdminController.editarPage',
   'POST /admin/noticia/actualizar/:id': 'AdminController.actualizar',
 
+  // ===============================
   // ELIMINAR NOTICIA
+  // ===============================
   'POST /admin/noticia/eliminar/:id': 'AdminController.eliminar'
 
 };

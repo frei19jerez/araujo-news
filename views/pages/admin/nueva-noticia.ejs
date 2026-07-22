@@ -19,10 +19,16 @@
   <div class="card shadow border-0">
     <div class="card-body p-4">
 
-      <form action="<%= baseUrl %>/noticia" method="POST" enctype="multipart/form-data">
+      <form
+        action="<%= baseUrl %>/admin/noticia/crear"
+        method="POST"
+        enctype="multipart/form-data">
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">Título</label>
+          <label class="form-label fw-semibold">
+            Título
+          </label>
+
           <input
             type="text"
             name="titulo"
@@ -32,7 +38,10 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">Contenido</label>
+          <label class="form-label fw-semibold">
+            Contenido
+          </label>
+
           <textarea
             name="contenido"
             class="form-control"
@@ -51,21 +60,27 @@
             class="form-select shadow-sm"
             required>
 
-            <option value="">📂 Seleccione una categoría</option>
+            <option value="">
+              📂 Seleccione una categoría
+            </option>
 
-            <% if (typeof categorias !== 'undefined' && categorias.length > 0) { %>
+            <% if (
+              typeof categorias !== 'undefined' &&
+              Array.isArray(categorias) &&
+              categorias.length > 0
+            ) { %>
 
-              <% categorias.forEach(function(c){ %>
+              <% categorias.forEach(function (categoria) { %>
 
-                <option value="<%= c.id %>">
-                  <%= c.nombre %>
+                <option value="<%= categoria.id %>">
+                  <%= categoria.nombre %>
                 </option>
 
-              <% }) %>
+              <% }); %>
 
             <% } else { %>
 
-              <option value="">
+              <option value="" disabled>
                 No hay categorías registradas
               </option>
 
@@ -80,17 +95,17 @@
 
         <div class="mb-3">
           <label class="form-label fw-semibold">
-            Imagen portada
+            Imagen de portada
           </label>
 
           <input
             type="file"
             name="imagen"
             class="form-control"
-            accept="image/*">
+            accept="image/jpeg,image/png,image/webp">
 
           <div class="form-text">
-            Formato recomendado JPG / PNG.
+            Formatos recomendados: JPG, PNG o WEBP.
           </div>
         </div>
 
@@ -112,7 +127,7 @@
 
         <div class="mb-3">
           <label class="form-label fw-semibold">
-            Enlace YouTube
+            Enlace de YouTube
           </label>
 
           <input
@@ -122,7 +137,7 @@
             placeholder="https://www.youtube.com/watch?v=...">
 
           <div class="form-text">
-            Pega aquí el enlace si el video está en YouTube.
+            Pega aquí el enlace si el video está alojado en YouTube.
           </div>
         </div>
 

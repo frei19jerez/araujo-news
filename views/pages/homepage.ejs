@@ -1,200 +1,517 @@
 <%
-  const runtimeBase = typeof baseUrl !== 'undefined' ? baseUrl : '';
-  const publicBase = 'https://demoflowapp.com' + runtimeBase;
+  const runtimeBase = typeof baseUrl !== 'undefined'
+    ? baseUrl
+    : '';
+
+  const publicBase =
+    'https://demoflowapp.com' + runtimeBase;
 %>
 
 <div class="container mt-4 mb-5">
 
   <!-- CABECERA -->
   <div class="text-center mb-4">
-    <h1 class="fw-bold">📰 Noticias Puerto Araujo</h1>
+    <h1 class="fw-bold">
+      📰 Noticias Puerto Araujo
+    </h1>
 
     <p class="text-muted mb-3">
       Actualidad, comunidad y noticias de Puerto Araujo Santander
     </p>
 
-    <form action="<%= runtimeBase %>/buscar" method="GET" class="mx-auto" style="max-width:700px;">
+    <form
+      action="<%= runtimeBase %>/buscar"
+      method="GET"
+      class="mx-auto"
+      style="max-width:700px;">
+
       <div class="input-group shadow-sm">
+
         <input
           type="text"
           name="q"
           class="form-control"
           placeholder="Buscar noticia..."
-          value="<%= typeof busqueda !== 'undefined' ? busqueda : '' %>"
-        >
+          value="<%= typeof busqueda !== 'undefined' ? busqueda : '' %>">
 
-        <button type="submit" class="btn btn-dark">
+        <button
+          type="submit"
+          class="btn btn-dark">
+
           Buscar
+
         </button>
+
       </div>
     </form>
 
     <div class="text-center mt-3">
-      <button id="btnInstalar" class="btn btn-success d-none">
+
+      <button
+        id="btnInstalar"
+        class="btn btn-success d-none">
+
         📱 Instalar Noticias Puerto Araujo
+
       </button>
+
     </div>
   </div>
 
   <!-- NOTICIA PRINCIPAL -->
-  <% if (typeof noticias !== 'undefined' && noticias.length > 0) { %>
+  <% if (
+    typeof noticias !== 'undefined' &&
+    noticias.length > 0
+  ) { %>
 
-    <% let principal = noticias[0]; %>
-    <% let rutaPrincipal = principal.slug ? '/n/' + principal.slug : '/noticia/' + principal.id; %>
-    <% let enlacePrincipal = runtimeBase + rutaPrincipal; %>
-    <% let urlCompletaPrincipal = publicBase + rutaPrincipal; %>
-    <% let textoPrincipal = 'Mira esta noticia: ' + principal.titulo + ' ' + urlCompletaPrincipal; %>
+    <%
+      const principal = noticias[0];
 
-    <div class="card shadow border-0 mb-5 overflow-hidden noticia-card">
+      const rutaPrincipal = principal.slug
+        ? '/n/' + principal.slug
+        : '/noticia/' + principal.id;
 
-      <% if (principal.imagen && principal.imagen.trim() !== '') { %>
+      const enlacePrincipal =
+        runtimeBase + rutaPrincipal;
+
+      const urlCompletaPrincipal =
+        publicBase + rutaPrincipal;
+
+      const textoPrincipal =
+        'Mira esta noticia: ' +
+        principal.titulo +
+        ' ' +
+        urlCompletaPrincipal;
+    %>
+
+    <div
+      class="card shadow border-0 mb-5 overflow-hidden noticia-card">
+
+      <!-- IMAGEN PRINCIPAL -->
+      <% if (
+        principal.imagen &&
+        principal.imagen.trim() !== ''
+      ) { %>
+
         <img
           src="<%= principal.imagen %>"
           alt="<%= principal.titulo %>"
           class="card-img-top"
           loading="lazy"
-          style="width:100%; max-height:520px; object-fit:cover;"
-        >
-      <% } else if (principal.video && principal.video.trim() !== '') { %>
-        <video controls class="w-100" style="max-height:520px;">
-          <source src="<%= principal.video %>">
-          Tu navegador no soporta video.
-        </video>
-      <% } else if (principal.youtubeEmbed && principal.youtubeEmbed.trim() !== '') { %>
+          style="
+            width:100%;
+            max-height:520px;
+            object-fit:cover;
+          ">
+
+      <% } %>
+
+      <!-- VIDEO LOCAL PRINCIPAL -->
+      <% if (
+        principal.video &&
+        principal.video.trim() !== ''
+      ) { %>
+
+        <div class="bg-dark">
+
+          <video
+            controls
+            preload="metadata"
+            class="w-100"
+            style="
+              display:block;
+              max-height:520px;
+              background:#000;
+            ">
+
+            <source src="<%= principal.video %>">
+
+            Tu navegador no soporta la reproducción de video.
+
+          </video>
+
+        </div>
+
+      <% } %>
+
+      <!-- VIDEO YOUTUBE PRINCIPAL -->
+      <% if (
+        principal.youtubeEmbed &&
+        principal.youtubeEmbed.trim() !== ''
+      ) { %>
+
         <div class="ratio ratio-16x9">
+
           <iframe
             src="<%= principal.youtubeEmbed %>"
             title="<%= principal.titulo %>"
+            allow="
+              accelerometer;
+              autoplay;
+              clipboard-write;
+              encrypted-media;
+              gyroscope;
+              picture-in-picture;
+              web-share
+            "
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
           </iframe>
+
         </div>
+
       <% } %>
 
       <div class="card-body p-4 p-md-5">
-        <span class="badge bg-danger mb-3">Noticia destacada</span>
+
+        <% if (principal.destacada) { %>
+
+          <span class="badge bg-danger mb-3">
+            ⭐ Noticia destacada
+          </span>
+
+        <% } %>
 
         <h2 class="mb-3">
-          <a href="<%= enlacePrincipal %>" class="text-decoration-none text-dark">
+
+          <a
+            href="<%= enlacePrincipal %>"
+            class="text-decoration-none text-dark">
+
             <%= principal.titulo %>
+
           </a>
+
         </h2>
 
         <% if (principal.createdAt) { %>
+
           <p class="text-muted small mb-3">
-            Publicado: <%= new Date(principal.createdAt).toLocaleString('es-CO') %>
+
+            Publicado:
+            <%= new Date(
+              principal.createdAt
+            ).toLocaleString('es-CO') %>
+
           </p>
+
         <% } %>
 
-        <% if (principal.categoria && principal.categoria.nombre) { %>
+        <% if (
+          principal.categoria &&
+          principal.categoria.nombre
+        ) { %>
+
           <p class="mb-3">
-            <span class="badge bg-primary"><%= principal.categoria.nombre %></span>
+
+            <span class="badge bg-primary">
+              <%= principal.categoria.nombre %>
+            </span>
+
           </p>
+
         <% } %>
 
         <p class="text-muted fs-5">
-          <%= principal.resumenCorto || principal.resumen || (principal.contenido.length > 250 ? principal.contenido.substring(0,250) + '...' : principal.contenido) %>
+
+          <%=
+            principal.resumenCorto ||
+            principal.resumen ||
+            (
+              principal.contenido.length > 250
+                ? principal.contenido.substring(
+                    0,
+                    250
+                  ) + '...'
+                : principal.contenido
+            )
+          %>
+
         </p>
 
         <div class="d-flex flex-wrap gap-2 mt-3">
-          <a href="<%= enlacePrincipal %>" class="btn btn-primary">Leer noticia completa</a>
 
-          <a href="https://wa.me/?text=<%= encodeURIComponent(textoPrincipal) %>" target="_blank" class="btn btn-success">
+          <a
+            href="<%= enlacePrincipal %>"
+            class="btn btn-primary">
+
+            Leer noticia completa
+
+          </a>
+
+          <a
+            href="https://wa.me/?text=<%= encodeURIComponent(textoPrincipal) %>"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-success">
+
             WhatsApp
+
           </a>
 
-          <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(urlCompletaPrincipal) %>" target="_blank" class="btn btn-outline-primary">
+          <a
+            href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(urlCompletaPrincipal) %>"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-outline-primary">
+
             Facebook
+
           </a>
 
-          <button type="button" class="btn btn-dark" onclick="copiarLink('<%= urlCompletaPrincipal %>')">
+          <button
+            type="button"
+            class="btn btn-dark"
+            onclick="copiarLink('<%= urlCompletaPrincipal %>')">
+
             Copiar link
+
           </button>
+
         </div>
+
       </div>
     </div>
 
   <% } %>
 
   <!-- RESULTADO DE BÚSQUEDA -->
-  <% if (typeof busqueda !== 'undefined' && busqueda) { %>
+  <% if (
+    typeof busqueda !== 'undefined' &&
+    busqueda
+  ) { %>
+
     <div class="alert alert-secondary shadow-sm">
-      Resultados para: <strong><%= busqueda %></strong>
+
+      Resultados para:
+      <strong><%= busqueda %></strong>
+
     </div>
+
   <% } %>
 
-  <!-- LISTADO -->
-  <% if (typeof noticias !== 'undefined' && noticias.length > 1) { %>
+  <!-- LISTADO DE NOTICIAS -->
+  <% if (
+    typeof noticias !== 'undefined' &&
+    noticias.length > 1
+  ) { %>
+
     <div class="row">
 
-      <% noticias.slice(1).forEach(function(n) { %>
+      <% noticias
+        .slice(1)
+        .forEach(function (noticia) { %>
 
-        <% let rutaNoticia = n.slug ? '/n/' + n.slug : '/noticia/' + n.id; %>
-        <% let enlaceNoticia = runtimeBase + rutaNoticia; %>
-        <% let urlCompleta = publicBase + rutaNoticia; %>
-        <% let textoCompartir = 'Mira esta noticia: ' + n.titulo + ' ' + urlCompleta; %>
+        <%
+          const rutaNoticia = noticia.slug
+            ? '/n/' + noticia.slug
+            : '/noticia/' + noticia.id;
+
+          const enlaceNoticia =
+            runtimeBase + rutaNoticia;
+
+          const urlCompleta =
+            publicBase + rutaNoticia;
+
+          const textoCompartir =
+            'Mira esta noticia: ' +
+            noticia.titulo +
+            ' ' +
+            urlCompleta;
+        %>
 
         <div class="col-md-6 mb-4">
-          <div class="card h-100 shadow-sm border-0 overflow-hidden noticia-card">
 
-            <% if (n.imagen && n.imagen.trim() !== '') { %>
+          <div
+            class="card h-100 shadow-sm border-0 overflow-hidden noticia-card">
+
+            <!-- IMAGEN -->
+            <% if (
+              noticia.imagen &&
+              noticia.imagen.trim() !== ''
+            ) { %>
+
               <img
-                src="<%= n.imagen %>"
-                alt="<%= n.titulo %>"
+                src="<%= noticia.imagen %>"
+                alt="<%= noticia.titulo %>"
                 class="card-img-top"
                 loading="lazy"
-                style="height:220px; object-fit:cover;"
-              >
-            <% } else if (n.video && n.video.trim() !== '') { %>
-              <video controls class="w-100" style="height:220px; object-fit:cover;">
-                <source src="<%= n.video %>">
-                Tu navegador no soporta video.
-              </video>
-            <% } else if (n.youtubeEmbed && n.youtubeEmbed.trim() !== '') { %>
-              <div class="ratio ratio-16x9">
-                <iframe src="<%= n.youtubeEmbed %>" title="<%= n.titulo %>" allowfullscreen></iframe>
+                style="
+                  height:220px;
+                  object-fit:cover;
+                ">
+
+            <% } %>
+
+            <!-- VIDEO LOCAL -->
+            <% if (
+              noticia.video &&
+              noticia.video.trim() !== ''
+            ) { %>
+
+              <div class="bg-dark">
+
+                <video
+                  controls
+                  preload="metadata"
+                  class="w-100"
+                  style="
+                    display:block;
+                    height:220px;
+                    object-fit:cover;
+                    background:#000;
+                  ">
+
+                  <source src="<%= noticia.video %>">
+
+                  Tu navegador no soporta la reproducción de video.
+
+                </video>
+
               </div>
+
+            <% } %>
+
+            <!-- VIDEO YOUTUBE -->
+            <% if (
+              noticia.youtubeEmbed &&
+              noticia.youtubeEmbed.trim() !== ''
+            ) { %>
+
+              <div class="ratio ratio-16x9">
+
+                <iframe
+                  src="<%= noticia.youtubeEmbed %>"
+                  title="<%= noticia.titulo %>"
+                  allow="
+                    accelerometer;
+                    autoplay;
+                    clipboard-write;
+                    encrypted-media;
+                    gyroscope;
+                    picture-in-picture;
+                    web-share
+                  "
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  allowfullscreen>
+                </iframe>
+
+              </div>
+
             <% } %>
 
             <div class="card-body d-flex flex-column">
-              <h4 class="mb-2">
-                <a href="<%= enlaceNoticia %>" class="text-decoration-none text-dark">
-                  <%= n.titulo %>
-                </a>
-              </h4>
 
-              <% if (n.createdAt) { %>
-                <p class="text-muted small mb-2">
-                  Publicado: <%= new Date(n.createdAt).toLocaleString('es-CO') %>
-                </p>
+              <% if (noticia.destacada) { %>
+
+                <span
+                  class="badge bg-danger align-self-start mb-2">
+
+                  ⭐ Destacada
+
+                </span>
+
               <% } %>
 
-              <% if (n.categoria && n.categoria.nombre) { %>
-                <p class="mb-2">
-                  <span class="badge bg-primary"><%= n.categoria.nombre %></span>
+              <h4 class="mb-2">
+
+                <a
+                  href="<%= enlaceNoticia %>"
+                  class="text-decoration-none text-dark">
+
+                  <%= noticia.titulo %>
+
+                </a>
+
+              </h4>
+
+              <% if (noticia.createdAt) { %>
+
+                <p class="text-muted small mb-2">
+
+                  Publicado:
+                  <%= new Date(
+                    noticia.createdAt
+                  ).toLocaleString('es-CO') %>
+
                 </p>
+
+              <% } %>
+
+              <% if (
+                noticia.categoria &&
+                noticia.categoria.nombre
+              ) { %>
+
+                <p class="mb-2">
+
+                  <span class="badge bg-primary">
+                    <%= noticia.categoria.nombre %>
+                  </span>
+
+                </p>
+
               <% } %>
 
               <p class="text-muted flex-grow-1">
-                <%= n.resumenCorto || n.resumen || (n.contenido.length > 140 ? n.contenido.substring(0,140) + '...' : n.contenido) %>
+
+                <%=
+                  noticia.resumenCorto ||
+                  noticia.resumen ||
+                  (
+                    noticia.contenido.length > 140
+                      ? noticia.contenido.substring(
+                          0,
+                          140
+                        ) + '...'
+                      : noticia.contenido
+                  )
+                %>
+
               </p>
 
               <div class="d-flex flex-wrap gap-2 mt-2">
-                <a href="<%= enlaceNoticia %>" class="btn btn-outline-primary btn-sm">Leer más</a>
 
-                <a href="https://wa.me/?text=<%= encodeURIComponent(textoCompartir) %>" target="_blank" class="btn btn-success btn-sm">
+                <a
+                  href="<%= enlaceNoticia %>"
+                  class="btn btn-outline-primary btn-sm">
+
+                  Leer más
+
+                </a>
+
+                <a
+                  href="https://wa.me/?text=<%= encodeURIComponent(textoCompartir) %>"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-success btn-sm">
+
                   WhatsApp
+
                 </a>
 
-                <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(urlCompleta) %>" target="_blank" class="btn btn-outline-primary btn-sm">
+                <a
+                  href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(urlCompleta) %>"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-outline-primary btn-sm">
+
                   Facebook
+
                 </a>
 
-                <button type="button" class="btn btn-dark btn-sm" onclick="copiarLink('<%= urlCompleta %>')">
-                  Copiar link
-                </button>
-              </div>
-            </div>
+                <button
+                  type="button"
+                  class="btn btn-dark btn-sm"
+                  onclick="copiarLink('<%= urlCompleta %>')">
 
+                  Copiar link
+
+                </button>
+
+              </div>
+
+            </div>
           </div>
         </div>
 
@@ -202,53 +519,115 @@
 
     </div>
 
-  <% } else if (!noticias || noticias.length === 0) { %>
+  <% } else if (
+    typeof noticias === 'undefined' ||
+    noticias.length === 0
+  ) { %>
+
     <div class="alert alert-info text-center shadow-sm">
+
       No hay noticias aún
+
     </div>
+
   <% } %>
 
 </div>
 
 <style>
   .noticia-card {
-    transition: 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
   }
 
   .noticia-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15) !important;
+    box-shadow:
+      0 12px 30px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .noticia-card iframe {
+    border: 0;
   }
 </style>
 
 <script>
   function copiarLink(url) {
-    navigator.clipboard.writeText(url)
-      .then(function() {
-        alert('✅ Link copiado correctamente');
-      })
-      .catch(function() {
-        alert('No se pudo copiar el link');
-      });
+    if (
+      navigator.clipboard &&
+      window.isSecureContext
+    ) {
+      navigator.clipboard
+        .writeText(url)
+        .then(function () {
+          alert('✅ Link copiado correctamente');
+        })
+        .catch(function () {
+          copiarLinkAlternativo(url);
+        });
+
+      return;
+    }
+
+    copiarLinkAlternativo(url);
+  }
+
+  function copiarLinkAlternativo(url) {
+    const textarea =
+      document.createElement('textarea');
+
+    textarea.value = url;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+
+    document.body.appendChild(textarea);
+
+    textarea.focus();
+    textarea.select();
+
+    try {
+      document.execCommand('copy');
+      alert('✅ Link copiado correctamente');
+    } catch (error) {
+      alert('No se pudo copiar el link');
+    }
+
+    document.body.removeChild(textarea);
   }
 
   let deferredPrompt;
 
-  window.addEventListener('beforeinstallprompt', function(e) {
-    e.preventDefault();
+  window.addEventListener(
+    'beforeinstallprompt',
+    function (event) {
+      event.preventDefault();
 
-    deferredPrompt = e;
+      deferredPrompt = event;
 
-    const btn = document.getElementById('btnInstalar');
+      const botonInstalar =
+        document.getElementById('btnInstalar');
 
-    if (btn) {
-      btn.classList.remove('d-none');
+      if (!botonInstalar) {
+        return;
+      }
 
-      btn.onclick = async function() {
-        btn.classList.add('d-none');
-        deferredPrompt.prompt();
-        deferredPrompt = null;
-      };
+      botonInstalar.classList.remove('d-none');
+
+      botonInstalar.onclick =
+        async function () {
+          botonInstalar.classList.add('d-none');
+
+          if (!deferredPrompt) {
+            return;
+          }
+
+          deferredPrompt.prompt();
+
+          await deferredPrompt.userChoice;
+
+          deferredPrompt = null;
+        };
     }
-  });
+  );
 </script>
