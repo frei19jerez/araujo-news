@@ -737,37 +737,122 @@ module.exports = {
     }
   },
 
-  /**
+    /**
    * SERVIR ARCHIVOS SUBIDOS
    */
   archivo(req, res) {
     try {
-      const file = req.params.file;
+      /*
+       * En Sails es más seguro usar req.param().
+       * También dejamos req.params.file como respaldo.
+       */
+      const nombreRecibido =
+        req.param('file') ||
+        (req.params && req.params.file) ||
+        '';
+
+      const file = path.basename(
+        String(nombreRecibido).trim()
+      );
 
       if (
         !file ||
         file.includes('..') ||
-        path.basename(file) !== file
+        file !== String(nombreRecibido).trim()
       ) {
-        return res.notFound();
+        console.warn(
+          '⚠️ Archivo solicitado no válido:',
+          nombreRecibido
+        );
+
+        return res.notFound(
+          'Archivo no encontrado'
+        );
       }
 
       const root = path.resolve(
         sails.config.appPath,
-        'assets/uploads'
+        'assets',
+        'uploads'
       );
 
-      return res.sendFile(file, {
+      const rutaCompleta = path.join(
+        root,
+        file
+      );
+
+      console.log(
+        '=============================='
+      );
+      console.log(
+        '📂 APP PATH:',
+        sails.config.appPath
+      );
+      console.log(
+        '📂 CARPETA UPLOADS:',
         root
+      );
+      console.log(
+        '🖼️ ARCHIVO SOLICITADO:',
+        file
+      );
+      console.log(
+        '🖼️ RUTA COMPLETA:',
+        rutaCompleta
+      );
+      console.log(
+        '✅ EXISTE:',
+        fs.existsSync(rutaCompleta)
+      );
+      console.log(
+        '=============================='
+      );
+
+      if (!fs.existsSync(rutaCompleta)) {
+        return res.notFound(
+          'Archivo no encontrado'
+        );
+      }
+
+      const extension = path
+        .extname(file)
+        .toLowerCase();
+
+      const tiposMime = {
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.svg': 'image/svg+xml',
+        '.mp4': 'video/mp4',
+        '.webm': 'video/webm',
+        '.mov': 'video/quicktime'
+      };
+
+      if (tiposMime[extension]) {
+        res.type(tiposMime[extension]);
+      }
+
+      res.set({
+        'Cache-Control': 'public, max-age=86400',
+        'X-Content-Type-Options': 'nosniff'
+      });
+
+      return res.sendFile(file, {
+        root,
+        dotfiles: 'deny'
       });
 
     } catch (error) {
       console.error(
-        'Error sirviendo archivo:',
+        '❌ Error sirviendo archivo:',
         error
       );
 
-      return res.notFound();
+      return res.notFound(
+        'Archivo no encontrado'
+      );
     }
   }
 
