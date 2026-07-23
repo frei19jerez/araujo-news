@@ -2,59 +2,58 @@
  * HTTP Server Settings
  * (sails.config.http)
  *
- * Configuration for the underlying HTTP server in Sails.
- * (for additional recommended settings, see `config/env/production.js`)
- *
- * For more information on configuration, check out:
- * https://sailsjs.com/config/http
+ * Configuración del servidor HTTP de Araujo News.
  */
 
 module.exports.http = {
 
-  /****************************************************************************
-  *                                                                           *
-  * Sails/Express middleware to run for every HTTP request.                   *
-  * (Only applies to HTTP requests -- not virtual WebSocket requests.)        *
-  *                                                                           *
-  * https://sailsjs.com/documentation/concepts/middleware                     *
-  *                                                                           *
-  ****************************************************************************/
+  /**
+   * Araujo News funciona detrás del proxy de DemoFlowApp.
+   *
+   * Esto permite que Express/Sails interprete correctamente
+   * las cabeceras X-Forwarded-* enviadas por el proxy.
+   */
+  trustProxy: true,
 
   middleware: {
 
-    /***************************************************************************
-    *                                                                          *
-    * The order in which middleware should be run for HTTP requests.           *
-    * (This Sails app's routes are handled by the "router" middleware below.)  *
-    *                                                                          *
-    ***************************************************************************/
+    /**
+     * Configuración personalizada de Skipper.
+     *
+     * Se aumentan los tiempos porque Araujo News funciona
+     * detrás del proxy de DemoFlowApp y de Render.
+     */
+    bodyParser: (function configurarBodyParser() {
+      const skipper = require('skipper');
 
-    // order: [
-    //   'cookieParser',
-    //   'session',
-    //   'bodyParser',
-    //   'compress',
-    //   'poweredBy',
-    //   'router',
-    //   'www',
-    //   'favicon',
-    // ],
+      return skipper({
+        strict: true,
 
+        /**
+         * Tiempo máximo para que Skipper entregue el control
+         * al controlador mientras procesa multipart/form-data.
+         */
+        maxWaitTimeBeforePassingControlToApp: 5000,
 
-    /***************************************************************************
-    *                                                                          *
-    * The body parser that will handle incoming multipart HTTP requests.       *
-    *                                                                          *
-    * https://sailsjs.com/config/http#?customizing-the-body-parser             *
-    *                                                                          *
-    ***************************************************************************/
+        /**
+         * Tiempo máximo para esperar que llegue el primer archivo
+         * del campo imagen o video.
+         *
+         * Evita el error ETIMEOUT que estaba apareciendo.
+         */
+        maxTimeToWaitForFirstFile: 120000,
 
-    // bodyParser: (function _configureBodyParser(){
-    //   var skipper = require('skipper');
-    //   var middlewareFn = skipper({ strict: true });
-    //   return middlewareFn;
-    // })(),
+        /**
+         * Tiempo máximo que Skipper mantiene un archivo esperando
+         * antes de conectarlo con req.file(...).upload(...).
+         *
+         * Evita errores EMAXBUFFER cuando la aplicación está
+         * detrás de proxies o la conexión es más lenta.
+         */
+        maxTimeToBuffer: 120000
+      });
+    })()
 
-  },
+  }
 
 };
