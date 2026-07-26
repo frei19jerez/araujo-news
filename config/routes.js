@@ -10,9 +10,13 @@ module.exports.routes = {
   'GET /buscar': 'NoticiaController.buscar',
 
   // ===============================
-  // ARCHIVOS
+  // ARCHIVOS (IMÁGENES Y VIDEOS)
   // ===============================
-  'GET /uploads/:file': 'NoticiaController.archivo',
+  'GET /uploads/:file': {
+    controller: 'NoticiaController',
+    action: 'archivo',
+    skipAssets: true
+  },
 
   // ===============================
   // LOGIN / AUTH
